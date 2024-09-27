@@ -3,43 +3,32 @@ import { BN } from "bn.js";
 import { CurveField, Point, PrivateKey, bnToHexLe } from "delphinus-curves/src/altjubjub";
 
 function zkWasmMiniRollupSendUrl() {
-  return "";
+  // TODO
+  return "______________/send";
 }
 
 function deriveL2Account(ton: TonConnectUI) {
-  const address = ton.account?.address;
-  // alert(address);
+  const l1address = ton.account?.address;
 
-  // Sign with address as message
-  // Extract L2Address
+  // TODO: Use address as msg and sign the msg
+  // const sig = ton.sign(l1address);
+
+  // TODO: derive L2Address from sig
+  // const l2address = sig.substring(sig, _);
+
   return "fffffffffffffff"
-}
-
-function derivePrikeyFromL2Account(l2account: String) {
-  return "0000000"
 }
 
 function sign(cmd: Array<bigint>, ton: TonConnectUI) {
   const l2address = deriveL2Account(ton);
-  //PrivateKey
-  //  alert("l2address" + l2address);
-  const prikey = derivePrikeyFromL2Account(l2address);
   // signning a [u64; 4] message with private key
-  const pkey = PrivateKey.fromString(prikey);
+  const pkey = PrivateKey.fromString(l2address);
   const r = pkey.r();
   const R = Point.base.mul(r);
   const H = cmd[0] + (cmd[1] << 64n) + (cmd[2] << 128n) + (cmd[3] << 196n);
   const hbn = new BN(H.toString(10));
   const S = r.add(pkey.key.mul(new CurveField(hbn)));
   const pubkey = pkey.publicKey;
-  const data = {
-    msg: bnToHexLe(hbn),
-    pkx: bnToHexLe(pubkey.key.x.v),
-    pky: bnToHexLe(pubkey.key.y.v),
-    sigx: bnToHexLe(R.x.v),
-    sigy: bnToHexLe(R.y.v),
-    sigr: bnToHexLe(S.v),
-  };
 
   return {
     msg: bnToHexLe(hbn),
@@ -51,6 +40,7 @@ function sign(cmd: Array<bigint>, ton: TonConnectUI) {
   };
 }
 
+// TODO
 export const signAndSend = async (cmd: Array<bigint>, ton: TonConnectUI) => {
   const sig = sign(cmd, ton);
 
@@ -67,6 +57,7 @@ export const signAndSend = async (cmd: Array<bigint>, ton: TonConnectUI) => {
   return data?.jobid;
 }
 
+// TODO: delete when completing signAndSend
 export const signAndSendMock = async (cmd: Array<bigint>, ton: TonConnectUI) => {
   return 999;
 }
