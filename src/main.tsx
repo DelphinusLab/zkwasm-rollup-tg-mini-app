@@ -1,21 +1,24 @@
-import { StrictMode } from 'react'
+import { FC, StrictMode, useMemo } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App.tsx'
 import './index.css'
 import { SDKProvider } from '@telegram-apps/sdk-react'
-import { MetaMaskUIProvider } from '@metamask/sdk-react-ui'
+import { TonConnectUIProvider } from '@tonconnect/ui-react'
+
+const Inner: FC = () => {
+  const manifestUrl = useMemo(() => {
+    return new URL('tonconnect-manifest.json', window.location.href).toString();
+  }, []);
+
+  return (
+    <TonConnectUIProvider manifestUrl={manifestUrl}>
+      <SDKProvider acceptCustomStyles>
+        <App />
+      </SDKProvider>
+    </TonConnectUIProvider>
+  );
+};
 
 createRoot(document.getElementById('root')!).render(
-  //<StrictMode>
-  <MetaMaskUIProvider sdkOptions={{
-    dappMetadata: {
-      name: "Example React Dapp",
-      url: window.location.href,
-    },
-  }}>
-    <SDKProvider acceptCustomStyles>
-      <App />
-    </SDKProvider>
-  </MetaMaskUIProvider >
-  //</StrictMode>,
+  <Inner />
 )
