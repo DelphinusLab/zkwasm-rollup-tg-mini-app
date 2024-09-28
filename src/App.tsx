@@ -5,28 +5,20 @@ import { TonConnectButton, useTonConnectUI, useTonWallet } from '@tonconnect/ui-
 import { signAndSend, signAndSendMock } from './sign';
 import '@telegram-apps/telegram-ui/dist/styles.css';
 import { Avatar, Button, Cell, List, Navigation, Placeholder, Section, Text, Title } from '@telegram-apps/telegram-ui';
+import { useAppKit } from '@reown/appkit/react'
+import { useAccount, useSignMessage } from 'wagmi';
+import { SignMessageMutateAsync } from 'wagmi/query';
 
-function Login() {
-  return (
-    <Placeholder
-      className='ton-connect-page__placeholder'
-      header='TON Connect'
-      description={
-        <List>
-          <Text>
-            To display the data related to the TON Connect, it is required to connect your wallet
-          </Text>
-          <TonConnectButton className='ton-connect-page__button' />
-        </List>
-      }
-    />
-  );
+
+function ConnectButton() {
+  return <w3m-button />
 }
 
 function App() {
-  const wallet = useTonWallet();
-
   const dataParams = new URLSearchParams(window.location.search);
+  const { signMessageAsync } = useSignMessage();
+  const { address, isConnecting } = useAccount();
+
   const miniApp = useMiniApp();
 
   const cmd = [
@@ -36,50 +28,25 @@ function App() {
     BigInt(dataParams.get("data3")!),
   ];
 
-  const [tonConnectUI] = useTonConnectUI();
-
-  const signAndSendBot = async () => {
-    const jobid = await signAndSendMock(cmd, tonConnectUI);
+  const signAndSendBot = async (cmd: Array<bigint>, signMessageAsync: SignMessageMutateAsync<any>) => {
+    const jobid = await signAndSend(cmd, address!.toString(), signMessageAsync);
     miniApp.sendData(String(jobid));
   }
 
-  if (!wallet) {
-    return <Login />;
-  }
-
-  const {
-    account: { chain, publicKey, address },
-    device: {
-      appName,
-      appVersion,
-      maxProtocolVersion,
-      platform,
-      features,
-    },
-  } = wallet;
-
   return (
     <List>
-      <Cell
-        after={<TonConnectButton className='ton-connect-page__button-connected' />}
+      <ConnectButton />
+      <Placeholder
+        action={<Button size="l" stretched onClick={async () => { await signAndSendBot(cmd, signMessageAsync) }}>Signature</Button>}
+        header="Sign"
+        description="1,2,3,4"
       >
-        <Title level='3'>{appName}</Title>
-      </Cell>
-      <div className="HIJtihMA8FHczS02iWF5">
-        <Placeholder
-          action={<Button size="l" stretched onClick={signAndSendBot}>Signature</Button>}
-          description={cmd.toString()}
-          header="Signature"
-        >
-          <img
-            alt="Telegram sticker"
-            className="blt0jZBzpxuR4oDhJc8s"
-            src="https://xelene.me/telegram.gif"
-            width={100}
-            height={100}
-          />
-        </Placeholder>
-      </div>
+        <img
+          alt="Telegram sticker"
+          src="https://xelene.me/telegram.gif"
+          style={{ display: 'block', width: '144px', height: '144px' }}
+        />
+      </Placeholder>
     </List>
   )
 }
